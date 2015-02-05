@@ -1,10 +1,10 @@
-process.stdin.pipe(require('split')()).on('data', processLine)
+process.stdin.pipe(require('split')()).on('data', processLine);
 
 // Object to hold aggregations; dumped when agg is complete
 var holder = {};
 
 // Needs improvement - what the shortest ID should be
-var levels = 3;
+
 
 process.stdin.on('end', function() {
     console.log('Isss all done mayne..');
@@ -16,9 +16,9 @@ var Aggregator = function() {};
 
 Aggregator.prototype = {
     aggregate: function(vals) {
-        this.count++
+        this.count++;
         for (var i in vals) {
-            this.values[i] += vals[i]
+            this.values[i] += vals[i];
         }
         if (this.count === 4) {
             this.outputVals();
@@ -28,7 +28,7 @@ Aggregator.prototype = {
         this.callback = callback;
         this.ID = ID;
         this.values = vals;
-        this.count++
+        this.count++;
     },
     outputVals: function(format) {
         for (var i in this.values) {
@@ -38,7 +38,7 @@ Aggregator.prototype = {
     },
     values: [],
     count: 0
-}
+};
 
 // Get a parent and aggregate it
 function getParent(data, ID) {
@@ -47,7 +47,7 @@ function getParent(data, ID) {
     if (holder[parent]) {
         holder[parent].aggregate(data);
     } else {
-        holder[parent] = new Aggregator;
+        holder[parent] = new Aggregator();
         holder[parent].initialize(parent, data, function(err, child, ID) {
             // Log to stdout - prob should do this a more official way.
             console.log(ID + ':' + JSON.stringify(child));
@@ -58,8 +58,8 @@ function getParent(data, ID) {
 
 // Handle the parent (as an intermediary)
 function handleParent(data, ID) {
-    if (ID.length > levels) {
-        getParent(data, ID)
+    if (ID.length > 10) {
+        getParent(data, ID);
     }
     delete holder[ID];
 }
@@ -68,7 +68,7 @@ function handleParent(data, ID) {
 function processLine(line) {
     try {
         var data = JSON.parse(line);
-        var parent = data.key.substring(0, data.key.length-2)
+        var parent = data.key.substring(0, data.key.length-2);
         handleParent(data.attributes, parent);
     } catch(err) {
         console.log(err);
