@@ -1,11 +1,17 @@
 process.stdin.pipe(require('split')()).on('data', processLine)
 
-var holder = {}
+// Object to hold aggregations; dumped when agg is complete
+var holder = {};
+
+// Needs improvement - what the shortest ID should be
+var levels = 3;
 
 process.stdin.on('end', function() {
-    console.log(holder);
+    console.log('Isss all done mayne..');
 });
 
+// The aggregator - for each attribute, sums values, and when 4 are reached,
+// it outputs each / 4 (== average), and sends these + the id to kill the object
 var Aggregator = function() {};
 
 Aggregator.prototype = {
@@ -34,30 +40,37 @@ Aggregator.prototype = {
     count: 0
 }
 
-function getParents(ID, count) {
-    var parents = [];
-    for(var i = 0; i < count; i++) {
-        parents.push(ID.substring(0, ID.length - (i * 2 + 2)));
+// Get a parent and aggregate it
+function getParent(data, ID) {
+    var parent = ID.substring(0, ID.length-2);
+    // Does the object exist? if so, aggregate its values; if not, initialize one
+    if (holder[parent]) {
+        holder[parent].aggregate(data);
+    } else {
+        holder[parent] = new Aggregator;
+        holder[parent].initialize(parent, data, function(err, child, ID) {
+            // Log to stdout - prob should do this a more official way.
+            console.log(ID + ':' + JSON.stringify(child));
+            handleParent(child, ID);
+        });
     }
-    return parents;
 }
 
+// Handle the parent (as an intermediary)
+function handleParent(data, ID) {
+    if (ID.length > levels) {
+        getParent(data, ID)
+    }
+    delete holder[ID];
+}
 
+// Process the line input and send to handleParent
 function processLine(line) {
     try {
-        var tO = JSON.parse(line);
-        var parent = tO.key.substring(0, tO.key.length-2)
-        if (holder[parent]) {
-            holder[parent].aggregate(tO.attributes);
-        } else {
-            holder[parent] = new Aggregator;
-            holder[parent].initialize(parent, tO.attributes, function(err, data, ID) {
-                console.log(ID + ': ' + JSON.stringify(data));
-                delete holder[ID];
-            });
-        }
+        var data = JSON.parse(line);
+        var parent = data.key.substring(0, data.key.length-2)
+        handleParent(data.attributes, parent);
     } catch(err) {
         console.log(err);
     }
 }
-
