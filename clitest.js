@@ -9,41 +9,52 @@ process.stdin.on('end', function() {
 var Aggregator = function() {};
 
 Aggregator.prototype = {
-    aggregate: function(val) {
-        this.value += val;
+    aggregate: function(vals) {
         this.count++
+        for (var i in vals) {
+            this.values[i] += vals[i]
+        }
         if (this.count === 4) {
-            this.outputVal('')
+            this.outputVals();
         }
     },
-    setCallback: function(ID, callback) {
+    initialize: function(ID, vals, callback) {
         this.callback = callback;
         this.ID = ID;
+        this.values = vals;
+        this.count++
     },
-    outputVal: function(format) {
-        return this.callback(null, this.value / 4, this.ID);
+    outputVals: function(format) {
+        for (var i in this.values) {
+            this.values[i] /= 4;
+        }
+        return this.callback(null, this.values, this.ID);
     },
-    value: 0,
+    values: [],
     count: 0
 }
 
-function processLine (line) {
+function getParents(ID, count) {
+    var parents = [];
+    for(var i = 0; i < count; i++) {
+        parents.push(ID.substring(0, ID.length - (i * 2 + 2)));
+    }
+    return parents;
+}
+
+
+function processLine(line) {
     try {
         var tO = JSON.parse(line);
         var parent = tO.key.substring(0, tO.key.length-2)
         if (holder[parent]) {
-            for (var a in tO.attributes) {
-                holder[parent].aggregate(tO.attributes[a]);
-            }
+            holder[parent].aggregate(tO.attributes);
         } else {
-            for (var a in tO.attributes) {
-                holder[parent] = new Aggregator;
-                holder[parent].setCallback(parent, function(err, data, ID) {
-                    console.log(ID + ': ' + data);
-                    delete holder[ID];
-                });
-                holder[parent].aggregate(tO.attributes[a]);
-            }
+            holder[parent] = new Aggregator;
+            holder[parent].initialize(parent, tO.attributes, function(err, data, ID) {
+                console.log(ID + ': ' + JSON.stringify(data));
+                delete holder[ID];
+            });
         }
     } catch(err) {
         console.log(err);
