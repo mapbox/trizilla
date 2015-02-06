@@ -1,8 +1,8 @@
 var split = require('split')();
-var aggregator = require('./lib/aggregator.js');
+var trizilla = require('./index');
 
 process.stdin.pipe(split)
-    .on('data', aggregator.processLine);
+    .on('data', trizilla.eatStream);
 
 process.stdin.on('end', function() {
 });
