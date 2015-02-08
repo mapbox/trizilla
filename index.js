@@ -9,12 +9,7 @@ function eatStream(line) {
   } catch(err) { }
 }
 
-function eatJSON(attributes, id) {
-    var parent = id.substring(0, id.length-2);
-    aggregator.handleParent(ttributes, parent);
-}
-
 module.exports = {
     eatStream: eatStream,
-    eatJSON: eatJSON
+    holder: aggregator.holder
 }
