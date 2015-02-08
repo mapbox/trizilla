@@ -4,10 +4,13 @@ var inflater = require('./lib/inflater');
 function eatStream(line) {
   try {
     var data = JSON.parse(line);
-    var parent = data.key.substring(0, data.key.length-2);
-    aggregator.handleParent(data.attributes, parent);
+    aggregator.dataEater(data.key, data.attributes, 3, pooStream);
   } catch(err) { }
 }
+
+function pooStream(err, GeoJSON) {
+    console.log(JSON.stringify(GeoJSON));
+};
 
 module.exports = {
     eatStream: eatStream,
