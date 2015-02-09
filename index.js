@@ -1,18 +1,23 @@
 var aggregator = require('./lib/aggregator');
-var inflater = require('./lib/inflater');
+var tiler = require('./lib/tiler');
 
 function streamOut(err, GeoJSON) {
   console.log(JSON.stringify(GeoJSON));
 };
 
-function eatStream(line) {
+function inflate(line, minzoom) {
+  minzoom = minzoom || data.key.length/2 - 1;
   try {
   var data = JSON.parse(line);
-  aggregator.dataEater(data.key, data.attributes, 5, streamOut);
+  aggregator.dataEater(data.key, data.attributes, minzoom, streamOut);
   } catch(err) { }
 }
 
+function tile() {
+    // some tiling magic here
+}
+
 module.exports = {
-  eatStream: eatStream,
-  streamOut: streamOut
+  inflate: inflate,
+  tile: tile
 }

@@ -67,7 +67,7 @@ Triangle.prototype = {
   }
 }
 
-function inflate(id, attributes, z, callback) {
+function inflator(id, attributes, z, callback) {
   var tile = parseID(id);
   var tri = new Triangle();
   tri.create(tile.BBOX, tile.direct, tile.orient, function(err, data) {
@@ -79,5 +79,5 @@ function inflate(id, attributes, z, callback) {
 }
 
 module.exports = {
-  inflate: inflate
+  inflator: inflator
 }
