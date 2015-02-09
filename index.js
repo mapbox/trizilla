@@ -14,5 +14,5 @@ function streamOut(err, GeoJSON) {
 
 module.exports = {
     eatStream: eatStream,
-    holder: aggregator.holder
+    streamOut: streamOut
 }
