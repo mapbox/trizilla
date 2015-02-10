@@ -1,16 +1,25 @@
-var aggregator = require('./lib/aggregator');
+var aggregate = require('./lib/aggregator');
+var inlate = require('./lib/inflator');
 var tiler = require('./lib/tiler');
 
 function streamOut(err, GeoJSON) {
   console.log(JSON.stringify(GeoJSON));
 };
 
+// consume stream, inflate ∆s, and make parents
 function inflate(line, minzoom) {
+
+  try { var data = JSON.parse(line); } catch(err) { }
   minzoom = minzoom || data.key.length/2 - 1;
-  try {
-  var data = JSON.parse(line);
-  aggregator.dataEater(data.key, data.attributes, minzoom, streamOut);
-  } catch(err) { }
+
+  var triZ = (data.key.length-1)/2;
+  inflate(data.key, data, triZ, function(err, GeoJSON) {
+    outputFunction(null, GeoJSON)
+  });
+
+  if (triZ > minZ) {
+    aggregate(data, data.key, minZ);
+  }
 }
 
 function tile() {
