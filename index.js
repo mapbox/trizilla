@@ -7,10 +7,10 @@ function streamOut(err, GeoJSON) {
 };
 
 // consume stream, inflate ∆s, and make parents
-function inflate(line, minzoom) {
+function inflate(line, minZ) {
 
   try { var data = JSON.parse(line); } catch(err) { }
-  minzoom = minzoom || data.key.length/2 - 1;
+  minZ = minZ || data.key.length/2 - 1;
 
   var triZ = (data.key.length-1)/2;
   inflator(data.key, data, triZ, function(err, GeoJSON) {
