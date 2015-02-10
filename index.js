@@ -1,24 +1,36 @@
+var util = require('util');
+var Transform = require('stream').Transform;
 var aggregator = require('./lib/aggregator');
 var inflator = require('./lib/inflator');
 //var tiler = require('./lib/tiler');
 
-function streamOut(err, GeoJSON) {
-  console.log(JSON.stringify(GeoJSON));
-};
+var parentHolder = {}
+
+util.inherits(InfateStream, Transform);
+function InflateStream(minZ) { Transform.call(this, concurrency) }
 
 // consume stream, inflate ∆s, and make parents
-function inflate(line, minZ) {
+InflateStream.prototype._transform = function(chunk, enc, callback) {
 
-  try { var data = JSON.parse(line); }
+  try { var data = JSON.parse(chunk); }
   catch(err) { }
 
-  inflator(data);
-
+  this.push(inflator(data));
   minZ = minZ || (data.key.length-1)/2;
   if ((data.key.length-1)/2 > minZ) {
-    aggregator(data, data.key, minZ);
+    var parent = ID.substring(0, ID.length-2);
+    // Does the parent object already exist? if so, aggregate its values; if not, initialize one
+    if (parentHolder[parent]) {
+      parentHolder[parent].aggregate(data);
+    } else {
+      parentHolder[parent] = new Aggregator();
+      parentHolder[parent].initialize(parent, data, function(err, child, pID) {
+        this.push(inflator(child));
+        parentHolder[pID] = {}
+      });
+    }
   }
-
+  callback();
 }
 
 function tile() {
@@ -26,6 +38,6 @@ function tile() {
 }
 
 module.exports = {
-  inflate: inflate,
-  tile: tile
+  inflate: function() { return new InfalteStream(); },
+  tile: function() { return new TileStream(); },
 }
