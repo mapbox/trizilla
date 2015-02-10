@@ -1,18 +1,16 @@
 var aggregator = require('./lib/aggregator');
 var inflater = require('./lib/inflater');
 
-function streamOut(err, GeoJSON) {
-  console.log(JSON.stringify(GeoJSON));
-};
-
-function eatStream(line) {
+function eat(line) {
   try {
   var data = JSON.parse(line);
-  aggregator.dataEater(data.key, data.attributes, 5, streamOut);
+  aggregator.dataEater(data.key, data.attributes, 5, function(err, GeoJSON) {
+    if (err) throw err;
+    callback(GeoJSON)
+  });
   } catch(err) { }
 }
 
 module.exports = {
-  eatStream: eatStream,
-  streamOut: streamOut
+  eat: eat,
 }
