@@ -7,13 +7,13 @@ var inflator = require('./lib/inflator');
 var parentHolder = {}
 
 util.inherits(InfateStream, Transform);
-function InflateStream(minZ) { Transform.call(this, concurrency) }
+function InflateStream(minZ) { Transform.call(this, minZ) }
 
 // consume stream, inflate ∆s, and make parents
 InflateStream.prototype._transform = function(chunk, enc, callback) {
 
   try { var data = JSON.parse(chunk); }
-  catch(err) { }
+  catch(err) { callback(err); }
 
   this.push(inflator(data));
   minZ = minZ || (data.key.length-1)/2;
