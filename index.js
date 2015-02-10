@@ -1,5 +1,5 @@
-var aggregate = require('./lib/aggregator');
-var inlate = require('./lib/inflator');
+var aggregator = require('./lib/aggregator');
+var inflator = require('./lib/inflator');
 var tiler = require('./lib/tiler');
 
 function streamOut(err, GeoJSON) {
@@ -13,12 +13,12 @@ function inflate(line, minzoom) {
   minzoom = minzoom || data.key.length/2 - 1;
 
   var triZ = (data.key.length-1)/2;
-  inflate(data.key, data, triZ, function(err, GeoJSON) {
+  inflator(data.key, data, triZ, function(err, GeoJSON) {
     outputFunction(null, GeoJSON)
   });
 
   if (triZ > minZ) {
-    aggregate(data, data.key, minZ);
+    aggregator(data, data.key, minZ);
   }
 }
 
