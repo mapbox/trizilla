@@ -1,6 +1,6 @@
 var aggregator = require('./lib/aggregator');
 var inflator = require('./lib/inflator');
-var tiler = require('./lib/tiler');
+//var tiler = require('./lib/tiler');
 
 function streamOut(err, GeoJSON) {
   console.log(JSON.stringify(GeoJSON));
@@ -9,17 +9,16 @@ function streamOut(err, GeoJSON) {
 // consume stream, inflate ∆s, and make parents
 function inflate(line, minZ) {
 
-  try { var data = JSON.parse(line); } catch(err) { }
-  minZ = minZ || data.key.length/2 - 1;
+  try { var data = JSON.parse(line); }
+  catch(err) { }
 
-  var triZ = (data.key.length-1)/2;
-  inflator(data.key, data, triZ, function(err, GeoJSON) {
-    outputFunction(null, GeoJSON)
-  });
+  inflator(data);
 
-  if (triZ > minZ) {
+  minZ = minZ || (data.key.length-1)/2;
+  if ((data.key.length-1)/2 > minZ) {
     aggregator(data, data.key, minZ);
   }
+
 }
 
 function tile() {

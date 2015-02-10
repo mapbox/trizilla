@@ -3,6 +3,6 @@ var trizilla = require('../index');
 
 process.stdin.pipe(split)
     .on('data', trizilla.inflate)
-    .pipe(trizilla.tiler)
     .pipe(process.stdout);
+    //.pipe(trizilla.tiler)
     // outputs tile-sized geojsons
