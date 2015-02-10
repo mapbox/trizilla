@@ -1,12 +1,12 @@
 var util = require('util');
 var Transform = require('stream').Transform;
 var aggregator = require('./lib/aggregator');
-var inflator = require('./lib/inflator');
+var inflator = require('./lib/inflator').inflate;
 //var tiler = require('./lib/tiler');
 
 var parentHolder = {}
 
-util.inherits(InfateStream, Transform);
+util.inherits(InflateStream, Transform);
 function InflateStream(minZ) { Transform.call(this, minZ) }
 
 // consume stream, inflate ∆s, and make parents
@@ -16,7 +16,7 @@ InflateStream.prototype._transform = function(chunk, enc, callback) {
   catch(err) { callback(err); }
 
   this.push(inflator(data));
-  minZ = minZ || (data.key.length-1)/2;
+  var minZ = minZ || (data.key.length-1)/2;
   if ((data.key.length-1)/2 > minZ) {
     var parent = ID.substring(0, ID.length-2);
     // Does the parent object already exist? if so, aggregate its values; if not, initialize one
