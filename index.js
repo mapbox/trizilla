@@ -25,6 +25,7 @@ InflateStream.prototype._transform = function(chunk, enc, callback) {
     } else {
       parentHolder[parent] = new Aggregator();
       parentHolder[parent].initialize(parent, data, function(err, child, pID) {
+        if (err) throw err;
         this.push(inflator(child));
         parentHolder[pID] = {}
       });
@@ -38,6 +39,6 @@ function tile() {
 }
 
 module.exports = {
-  inflate: function() { return new InfalteStream(); },
+  inflate: function() { return new InflateStream(); },
   tile: function() { return new TileStream(); },
 }
