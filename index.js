@@ -17,7 +17,9 @@ module.exports = function() {
 
     inflateStream.push(inflator(data));
     minZ = inflateStream.minZ || (data.key.length-1)/2;
-    if ((data.key.length-1)/2 > minZ) {
+    if ((data.key.length-1)/2 > minZ) agg(data);
+
+    function agg(data) {
       var parent = data.key.substring(0, data.key.length-2);
       // Does the parent object already exist? if so, aggregate its values; if not, initialize one
       if (parentHolder[parent]) {
@@ -26,11 +28,14 @@ module.exports = function() {
         parentHolder[parent] = new Aggregator();
         parentHolder[parent].initialize(parent, data.attributes, function(err, child, pID) {
           if (err) throw err;
-          inflateStream.push(inflator({ "key": parent, "attributes": child }));
+          var pdata = { "key": pID, "attributes": child }
+          inflateStream.push(inflator(pdata));
+          if ((pID.length-1)/2 > minZ) agg(pdata);
           parentHolder[pID] = {}
         });
       }
     }
+
     callback();
   }
   return {
