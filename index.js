@@ -1,6 +1,6 @@
 var util = require('util');
 var Transform = require('stream').Transform;
-var aggregator = require('./lib/aggregator')();
+var Aggregator = require('./lib/aggregator');
 var inflator = require('./lib/inflator').inflate;
 //var tiler = require('./lib/tiler');
 
@@ -15,7 +15,7 @@ module.exports = function() {
     try { var data = JSON.parse(chunk); }
     catch(err) { callback(err); }
 
-    console.log(aggregator);
+    //console.log(Aggregator);
     this.push(inflator(data));
     minZ = this.minZ || (data.key.length-1)/2;
     if ((data.key.length-1)/2 > minZ) {
@@ -25,7 +25,7 @@ module.exports = function() {
       if (parentHolder[parent]) {
         parentHolder[parent].aggregate(data);
       } else {
-        parentHolder[parent] = new aggregator.Aggregator();
+        parentHolder[parent] = new Aggregator;
         parentHolder[parent].initialize(parent, data, function(err, child, pID) {
           if (err) throw err;
           this.push(inflator(child));
