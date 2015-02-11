@@ -22,5 +22,7 @@
     "trizilla-eat": "bin/trizilla-eat",
     "trizilla-tile": "bin/trizilla-tile"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "tape": "^3.5.0"
+  }
 }
