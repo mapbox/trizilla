@@ -21,10 +21,10 @@ module.exports = function() {
       var parent = data.key.substring(0, data.key.length-2);
       // Does the parent object already exist? if so, aggregate its values; if not, initialize one
       if (parentHolder[parent]) {
-        parentHolder[parent].aggregate(data);
+        parentHolder[parent].aggregate(data.attributes);
       } else {
-        parentHolder[parent] = new Aggregator;
-        parentHolder[parent].initialize(parent, data, function(err, child, pID) {
+        parentHolder[parent] = new Aggregator();
+        parentHolder[parent].initialize(parent, data.attributes, function(err, child, pID) {
           if (err) throw err;
           inflateStream.push(inflator({ "key": parent, "attributes": child }));
           parentHolder[pID] = {}
