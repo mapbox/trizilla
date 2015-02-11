@@ -2,7 +2,7 @@ var util = require('util');
 var Transform = require('stream').Transform;
 var Aggregator = require('./lib/aggregator');
 var inflator = require('./lib/inflator').inflate;
-//var tiler = require('./lib/tiler');
+var tiler = require('./lib/tiler');
 
 module.exports = function() {
   var parentHolder = {}
@@ -40,6 +40,6 @@ module.exports = function() {
   }
   return {
     inflate: function(value) { return new InflateStream(value); }
-    //tile: function() { return new TileStream(); }
+    tile: function() { return new TileStream(); }
   }
 }
