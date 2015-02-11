@@ -10,6 +10,7 @@
     "url": "git://github.com/mapbox/trizilla.git"
   },
   "dependencies": {
+    "JSONStream": "0.10.x",
     "minimist": "^1.1.0",
     "split": "^0.3.3",
     "tilebelt": "^0.7.0"
