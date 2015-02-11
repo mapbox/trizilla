@@ -1,0 +1,28 @@
+{
+  "name": "trizilla",
+  "version": "0.0.0",
+  "main": "./index",
+  "engines": {
+    "node": "0.10.31"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mapbox/trizilla.git"
+  },
+  "dependencies": {
+    "minimist": "^1.1.0",
+    "split": "^0.3.3",
+    "tilebelt": "^0.7.0"
+  },
+  "scripts": {
+    "start": "./index.js",
+    "test": "tape test/*.test.js"
+  },
+  "bin": {
+    "trizilla-eat": "bin/trizilla-eat",
+    "trizilla-tile": "bin/trizilla-tile"
+  },
+  "devDependencies": {
+    "tape": "^3.5.0"
+  }
+}
