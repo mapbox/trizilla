@@ -1,16 +1,23 @@
 var trizilla = require('../index');
+var fs = require('fs');
+var JSONStream = require('JSONStream');
 
 function tileCallback(err, tileData) {
-  console.log(tileData);
+  console.log(JSON.stringify(tileData));
 }
 
-trizilla.layTiles.initTiler(3, tileCallback);
+var stream = fs.createReadStream('./test/fixtures/trigeojsonstream.txt');
 
-var input = '{"type":"Feature","geometry":{"type":"Polygon","coordinates":[[[-174.375,84.54136107313408],[-168.75,85.0511287798066],[-174.375,85.0511287798066],[-174.375,84.54136107313408]]]},"properties":{"band_1":4.298577568913235,"zEquiv":13,"qtid":"n0n0n0n0n0n1n"}}'
+var parser = JSONStream.parse();
 
-var GeoJSON = JSON.parse(input);
+stream.pipe(parser);
 
-trizilla.layTiles.getTile(GeoJSON)
+trizilla.layTiles.initTiler(5, tileCallback);
+
+parser.on('root', function (GeoJSON) {
+  GeoJSON.properties.qtid = GeoJSON.properties.quadtree;
+  trizilla.layTiles.getTile(GeoJSON);
+});
 
 trizilla.layTiles.flushTiles();
 
