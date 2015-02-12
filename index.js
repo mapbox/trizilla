@@ -38,8 +38,21 @@ module.exports = function() {
 
     callback();
   }
+
+  util.inherits(LayTileStream, Transform);
+  function LayTileStream() {}
+  LayTileStream.prototype._transform = function(chunk, enc, callback) {
+    var layTileStream = this;
+    try { var data = JSON.parse(chunk); }
+    catch(err) { callback(err); }
+    tiler.initTiler(5, function(err, tile) {
+      layTileStream.push(tile)
+    });
+    tiler.getTile(data);
+  }
+
   return {
     inflate: function(value) { return new InflateStream(value); },
-    tile: function() { return new TileStream(); }
+    tile: function() { return new LayTileStream(); }
   }
 }
