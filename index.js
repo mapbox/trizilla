@@ -47,7 +47,6 @@ module.exports = function() {
     catch(err) { callback(err); }
     delta = layTileStream.delta;
     tiler.initTiler(delta, function(err, tile) {
-      console.log(tile)
       layTileStream.push(tile)
     });
     tiler.getTile(data);
@@ -55,6 +54,6 @@ module.exports = function() {
 
   return {
     inflate: function(value) { return new InflateStream(value); },
-    tile: function(d) { return new LayTileStream(d); }
+    tile: function(delta) { return new LayTileStream(delta); }
   }
 }
