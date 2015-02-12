@@ -1,8 +1,11 @@
 var util = require('util');
+var path = require('path');
+var mapnik = require('mapnik');
 var Transform = require('stream').Transform;
 var Aggregator = require('./lib/aggregator');
 var tiler = require('./lib/tiler');
-var inflator = require('./lib/inflator').inflate;
+var inflator = require('./lib/inflator');
+mapnik.register_datasource(path.join(mapnik.settings.paths.input_plugins,'ogr.input'));
 
 module.exports = function() {
   var parentHolder = {}
@@ -51,7 +54,6 @@ module.exports = function() {
     catch(err) { callback(err); }
     delta = layTileStream.delta;
     tileHolder = layTileStream.tileHolder;
-    //console.log(tileHolder)
 
     var qti = data.properties.qt.match(/[0-9]/g).join('');
     var tileQuad = qti.substring(0, qti.length - tileHolder.zoomDelta);
@@ -59,10 +61,9 @@ module.exports = function() {
       tileHolder.tiles[tileQuad].addFeature(data);
     } else {
       tileHolder.tiles[tileQuad] = new tiler.Tile();
-      tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tile) {
+      tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
         if (err) throw err;
-        //console.log(tile);
-        layTileStream.push(JSON.stringify(tile));
+        layTileStream.push(JSON.stringify(makeTile(tileObj)));
       });
     }
     callback();
@@ -72,4 +73,14 @@ module.exports = function() {
     inflate: function(value) { return new InflateStream(value); },
     tile: function(delta) { return new LayTileStream(delta); }
   }
+}
+
+function makeTile(t) {
+  var geojson = {
+    "type": "FeatureCollection",
+    "features": t.features
+  }
+  var vtile = new mapnik.VectorTile(t.xyz[0],t.xyz[1],t.xyz[2]);
+  vtile.addGeoJSON(JSON.stringify(geojson),"now");
+  return vtile;
 }
