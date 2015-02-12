@@ -40,12 +40,14 @@ module.exports = function() {
   }
 
   util.inherits(LayTileStream, Transform);
-  function LayTileStream() {}
+  function LayTileStream(delta) { Transform.call(this, delta); this.delta = delta; }
   LayTileStream.prototype._transform = function(chunk, enc, callback) {
     var layTileStream = this;
     try { var data = JSON.parse(chunk); }
     catch(err) { callback(err); }
-    tiler.initTiler(5, function(err, tile) {
+    delta = layTileStream.delta;
+    tiler.initTiler(delta, function(err, tile) {
+      console.log(tile)
       layTileStream.push(tile)
     });
     tiler.getTile(data);
@@ -53,6 +55,6 @@ module.exports = function() {
 
   return {
     inflate: function(value) { return new InflateStream(value); },
-    tile: function() { return new LayTileStream(); }
+    tile: function(d) { return new LayTileStream(d); }
   }
 }
