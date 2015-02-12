@@ -1,8 +1,8 @@
 var util = require('util');
 var Transform = require('stream').Transform;
 var Aggregator = require('./lib/aggregator');
-var inflator = require('./lib/inflator').inflate;
 var tiler = require('./lib/tiler');
+var inflator = require('./lib/inflator').inflate;
 
 module.exports = function() {
   var parentHolder = {}
@@ -40,16 +40,32 @@ module.exports = function() {
   }
 
   util.inherits(LayTileStream, Transform);
-  function LayTileStream(delta) { Transform.call(this, delta); this.delta = delta; }
+  function LayTileStream(delta) {
+    Transform.call(this, delta);
+    this.delta = delta;
+    this.tileHolder = new tiler.Tiler(delta);
+  }
   LayTileStream.prototype._transform = function(chunk, enc, callback) {
     var layTileStream = this;
     try { var data = JSON.parse(chunk); }
     catch(err) { callback(err); }
     delta = layTileStream.delta;
-    tiler.initTiler(delta, function(err, tile) {
-      layTileStream.push(tile)
-    });
-    tiler.getTile(data);
+    tileHolder = layTileStream.tileHolder;
+    //console.log(tileHolder)
+
+    var qti = data.properties.qt.match(/[0-9]/g).join('');
+    var tileQuad = qti.substring(0, qti.length - tileHolder.zoomDelta);
+    if (tileHolder.tiles[tileQuad]) {
+      tileHolder.tiles[tileQuad].addFeature(data);
+    } else {
+      tileHolder.tiles[tileQuad] = new tiler.Tile();
+      tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tile) {
+        if (err) throw err;
+        //console.log(tile);
+        layTileStream.push(JSON.stringify(tile));
+      });
+    }
+    callback();
   }
 
   return {
