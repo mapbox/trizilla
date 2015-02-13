@@ -1,5 +1,6 @@
 var util = require('util');
 var path = require('path');
+var zlib = require('zlib');
 var mapnik = require('mapnik');
 var Transform = require('stream').Transform;
 var Aggregator = require('./lib/aggregator');
@@ -63,7 +64,9 @@ module.exports = function() {
       tileHolder.tiles[tileQuad] = new tiler.Tile();
       tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
         if (err) throw err;
-        layTileStream.push(makeTile(tileObj));
+        makeTile(tileObj, function(err, serialTile) {
+          layTileStream.push(serialTile);
+        });
       });
     }
     callback();
@@ -75,12 +78,28 @@ module.exports = function() {
   }
 }
 
-function makeTile(t) {
+function makeTile(t, callback) {
   var geojson = {
     "type": "FeatureCollection",
     "features": t.features
   }
   var vtile = new mapnik.VectorTile(t.xyz[2],t.xyz[0],t.xyz[1]);
   vtile.addGeoJSON(JSON.stringify(geojson), "now");
-  return JSON.stringify(vtile);
+  zipTile(vtile, function(err, buf) {
+    if (err) return callback(err);
+    var serialObj = {
+      z: t.xyz[2],
+      x: t.xyz[0],
+      y: t.xyz[1],
+      buffer: buf.toString('base64')
+    }
+    return callback(null, JSON.stringify(serialObj));
+  });
+}
+
+function zipTile(vtile, callback) {
+  zlib.gzip(vtile.getData(), function(err, buffer) {
+    if (err) return callback(err);
+    return callback(null, buffer);
+  });
 }
