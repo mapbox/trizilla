@@ -1,5 +1,6 @@
 var util = require('util');
 var path = require('path');
+var zlib = require('zlib');
 var mapnik = require('mapnik');
 var Transform = require('stream').Transform;
 var Aggregator = require('./lib/aggregator');
@@ -38,7 +39,6 @@ module.exports = function() {
         });
       }
     }
-
     callback();
   }
 
@@ -63,24 +63,52 @@ module.exports = function() {
       tileHolder.tiles[tileQuad] = new tiler.Tile();
       tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
         if (err) throw err;
-        layTileStream.push(JSON.stringify(makeTile(tileObj)));
+        layTileStream.push(makeTile(tileObj));
       });
     }
     callback();
   }
 
+  util.inherits(CerealStream, Transform);
+  function CerealStream(x) { Transform.call(this, x); }
+  CerealStream.prototype._transform = function(chunk, enc, callback) {
+    var cerealStream = this;
+    try { var data = JSON.parse(chunk); }
+    catch(err) { callback(err); }
+
+    zlib.gzip(data.buf, function(err, buffer) {
+      if (err) console.log(err);
+      var obj = {
+        z: data.z,
+        x: data.x,
+        y: data.y,
+        buffer: buffer.toString('base64')
+      }
+      cerealStream.push(JSON.stringify(obj));
+      callback();
+    });
+  }
+
   return {
     inflate: function(value) { return new InflateStream(value); },
-    tile: function(delta) { return new LayTileStream(delta); }
+    tile: function(delta) { return new LayTileStream(delta); },
+    serialize: function(x) { return new CerealStream(x); }
   }
 }
 
-function makeTile(t) {
+function makeTile(t, callback) {
   var geojson = {
     "type": "FeatureCollection",
     "features": t.features
   }
-  var vtile = new mapnik.VectorTile(t.xyz[0],t.xyz[1],t.xyz[2]);
-  vtile.addGeoJSON(JSON.stringify(geojson),"now");
-  return vtile;
+  var vtile = new mapnik.VectorTile(t.xyz[2],t.xyz[0],t.xyz[1]);
+  vtile.addGeoJSON(JSON.stringify(geojson), "now");
+  var obj = {
+    z: t.xyz[2],
+    x: t.xyz[0],
+    y: t.xyz[1],
+    buf: vtile.getData().toString()
+  }
+  return JSON.stringify(obj);
 }
+
