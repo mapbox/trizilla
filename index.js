@@ -63,7 +63,7 @@ module.exports = function() {
       tileHolder.tiles[tileQuad] = new tiler.Tile();
       tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
         if (err) throw err;
-        layTileStream.push(JSON.stringify(makeTile(tileObj)));
+        layTileStream.push(makeTile(tileObj));
       });
     }
     callback();
@@ -80,7 +80,7 @@ function makeTile(t) {
     "type": "FeatureCollection",
     "features": t.features
   }
-  var vtile = new mapnik.VectorTile(t.xyz[0],t.xyz[1],t.xyz[2]);
-  vtile.addGeoJSON(JSON.stringify(geojson),"now");
-  return vtile;
+  var vtile = new mapnik.VectorTile(t.xyz[2],t.xyz[0],t.xyz[1]);
+  vtile.addGeoJSON(JSON.stringify(geojson), "now");
+  return JSON.stringify(vtile);
 }
