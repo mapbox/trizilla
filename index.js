@@ -39,7 +39,6 @@ module.exports = function() {
         });
       }
     }
-
     callback();
   }
 
@@ -64,17 +63,36 @@ module.exports = function() {
       tileHolder.tiles[tileQuad] = new tiler.Tile();
       tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
         if (err) throw err;
-        makeTile(tileObj, function(err, serialTile) {
-          layTileStream.push(serialTile);
-        });
+        layTileStream.push(makeTile(tileObj));
       });
     }
     callback();
   }
 
+  util.inherits(CerealStream, Transform);
+  function CerealStream(x) { Transform.call(this, x); }
+  CerealStream.prototype._transform = function(chunk, enc, callback) {
+    var cerealStream = this;
+    try { var data = JSON.parse(chunk); }
+    catch(err) { callback(err); }
+
+    zlib.gzip(data.buf, function(err, buffer) {
+      if (err) console.log(err);
+      var obj = {
+        z: data.z,
+        x: data.x,
+        y: data.y,
+        buffer: buffer.toString('base64')
+      }
+      cerealStream.push(JSON.stringify(obj));
+      callback();
+    });
+  }
+
   return {
     inflate: function(value) { return new InflateStream(value); },
-    tile: function(delta) { return new LayTileStream(delta); }
+    tile: function(delta) { return new LayTileStream(delta); },
+    serialize: function(x) { return new CerealStream(x); }
   }
 }
 
@@ -85,21 +103,12 @@ function makeTile(t, callback) {
   }
   var vtile = new mapnik.VectorTile(t.xyz[2],t.xyz[0],t.xyz[1]);
   vtile.addGeoJSON(JSON.stringify(geojson), "now");
-  zipTile(vtile, function(err, buf) {
-    if (err) return callback(err);
-    var serialObj = {
-      z: t.xyz[2],
-      x: t.xyz[0],
-      y: t.xyz[1],
-      buffer: buf.toString('base64')
-    }
-    return callback(null, JSON.stringify(serialObj));
-  });
+  var obj = {
+    z: t.xyz[2],
+    x: t.xyz[0],
+    y: t.xyz[1],
+    buf: vtile.getData().toString()
+  }
+  return JSON.stringify(obj);
 }
 
-function zipTile(vtile, callback) {
-  zlib.gzip(vtile.getData(), function(err, buffer) {
-    if (err) return callback(err);
-    return callback(null, buffer);
-  });
-}
