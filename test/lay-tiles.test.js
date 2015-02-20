@@ -14,10 +14,10 @@ var tri_tiler = new trizilla_tiler.Tile()
 
 function tileCallback(err, tileData) {
   tape('should match the tiled feature', function(t) {
-  t.ok(tri_tiler, 'is inflating');
-  var expected = JSON.parse(fs.readFileSync('./test/fixtures/laytile-expected.txt'));
-  t.equal(JSON.stringify(expected), JSON.stringify(tileData));
-  t.end();
+    t.ok(tri_tiler, 'is inflating');
+    var expected = JSON.parse(fs.readFileSync('./test/fixtures/laytile-expected.txt'));
+    t.equal(JSON.stringify(expected), JSON.stringify(tileData));
+    t.end();
   })
 }
 
