@@ -7,9 +7,7 @@ var Aggregator = require('./lib/aggregator');
 var tiler = require('./lib/tiler');
 var inflator = require('./lib/inflator');
 
-mapnik.register_datasource(path.join(
-  mapnik.settings.paths.input_plugins,'ogr.input')
-);
+mapnik.register_datasource(path.join(mapnik.settings.paths.input_plugins,'geojson.input'));
 
 module.exports = function() {
   var parentHolder = {};
