@@ -20,10 +20,6 @@
     "start": "./index.js",
     "test": "tape test/*.test.js"
   },
-  "bin": {
-    "trizilla-eat": "bin/trizilla-eat",
-    "trizilla-tile": "bin/trizilla-tile"
-  },
   "devDependencies": {
     "tape": "^3.5.0"
   }
