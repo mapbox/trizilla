@@ -98,7 +98,7 @@ module.exports = function() {
     if (!chunk.toString()) return callback();
     var data;
     try {
-      var data = JSON.parse(chunk);
+      data = JSON.parse(chunk);
     } catch(err) {callback()}
     this.push(JSON.stringify(data));
     callback();
