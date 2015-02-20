@@ -89,10 +89,26 @@ module.exports = function() {
     });
   }
 
+  util.inherits(CleanStream, Transform);
+  function CleanStream(options) {
+    Transform.call(this, options)
+  }
+
+  CleanStream.prototype._transform = function(chunk, enc, callback) {
+    if (!chunk.toString()) return callback();
+    var data;
+    try {
+      var data = JSON.parse(chunk);
+    } catch(err) {callback()}
+    this.push(JSON.stringify(data));
+    callback();
+  }
+
   return {
     inflate: function(value) { return new InflateStream(value); },
     tile: function(delta) { return new LayTileStream(delta); },
-    serialize: function(x) { return new CerealStream(x); }
+    serialize: function(x) { return new CerealStream(x); },
+    clean: function(options) { return new CleanStream(options); }
   }
 }
 
