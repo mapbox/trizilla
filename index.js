@@ -162,7 +162,7 @@ module.exports = function() {
     inflate: function(value) { return new InflateStream(value); },
     tile: function(delta) { return new LayTileStream(delta); },
     serialize: function(x) { return new CerealStream(x); },
-    clean: function(options) { return new CleanStream(options); }
+    clean: function(options) { return new CleanStream(options); },
     compress: function(levels) { return new CompressStream(levels); }
   };
 };
