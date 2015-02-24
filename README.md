@@ -1,4 +1,5 @@
 # tri-zilla
+[![Build Status](https://travis-ci.org/mapbox/trizilla.svg)](https://travis-ci.org/mapbox/trizilla)
 Consumes data values from a latticegrid, then aggregates and inflates triangular geometries.
 
 ## inputs
