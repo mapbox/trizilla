@@ -41,7 +41,7 @@ module.exports = function() {
           var pdata = { "qt": pID, "attributes": child };
           inflateStream.push(inflator(pdata));
 
-          if ((pID.length-1)/2 > minZ) agg(pdata);
+          if ((pID.length-1)/2 >= minZ) agg(pdata);
 
           parentHolder[pID] = {};
         });
