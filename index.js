@@ -171,7 +171,7 @@ module.exports = function() {
     var dc = new Compress.Decompressor()
     dc.decompress(data, function(err, outData) {
       for (var i = 0; i < outData.length; i++) {
-        decompStream.push(JSON.stringify(outData[i]));
+        decompStream.push(JSON.stringify(outData[i]) + '\n');
       }
     });
 
