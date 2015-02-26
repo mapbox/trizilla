@@ -36,7 +36,7 @@ module.exports = function() {
       } else {
         parentHolder[parent] = new Aggregator();
         parentHolder[parent].initialize(parent, data.attributes, function(err, child, pID) {
-          if (err) throw err;
+          if (err) callback(err);
 
           var pdata = { "qt": pID, "attributes": child };
           inflateStream.push(inflator(pdata));
@@ -75,7 +75,7 @@ module.exports = function() {
     } else {
       tileHolder.tiles[tileQuad] = new tiler.Tile();
       tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
-        if (err) throw err;
+        if (err) callback(err);
         layTileStream.push(makeTile(tileObj));
       });
     }
@@ -92,7 +92,7 @@ module.exports = function() {
 
     try {
       data = JSON.parse(chunk);
-    } catch(err) { callback(); }
+    } catch(err) { return callback(); }
 
     this.push(JSON.stringify(data));
 
@@ -112,6 +112,7 @@ module.exports = function() {
     try {
       data = JSON.parse(chunk);
     } catch(err) { callback(err); }
+
     levels = compStream.levels
     compressionHolder = compStream.compressionHolder;
 
@@ -122,7 +123,7 @@ module.exports = function() {
     } else {
       compressionHolder[qt] = new Compress.Compressor();
       compressionHolder[qt].initialize(data, levels, 2, function (err, out, dQt) {
-        if (err) throw err;
+        if (err) callback(err);
         compStream.push(JSON.stringify(out));
         compressionHolder[dQt] = true;
       });
