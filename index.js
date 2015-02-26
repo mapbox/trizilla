@@ -82,33 +82,6 @@ module.exports = function() {
     callback();
   };
 
-  util.inherits(CerealStream, Transform);
-  function CerealStream(x) { Transform.call(this, x); }
-
-  CerealStream.prototype._transform = function(chunk, enc, callback) {
-    var cerealStream = this;
-    var data;
-
-    try {
-      data = JSON.parse(chunk);
-    } catch(err) { callback(err); }
-
-    zlib.gzip(data.buf, function(err, buffer) {
-      if (err) console.log(err);
-
-      var obj = {
-        z: data.z,
-        x: data.x,
-        y: data.y,
-        buffer: buffer.toString('base64')
-      };
-
-      cerealStream.push(JSON.stringify(obj));
-
-      callback();
-    });
-  };
-
   util.inherits(CleanStream, Transform);
   function CleanStream(options) { Transform.call(this, options); }
 
@@ -181,14 +154,14 @@ module.exports = function() {
   return {
     inflate: function(value) { return new InflateStream(value); },
     tile: function(delta) { return new LayTileStream(delta); },
-    serialize: function(x) { return new CerealStream(x); },
     clean: function(options) { return new CleanStream(options); },
     compress: function(levels) { return new CompressStream(levels); },
-    decompress: function(levels) {return new DecompressStream(levels)}
+    decompress: function(levels) {return new DecompressStream(levels)},
+    clean: function(options) { return new CleanStream(options); }
   };
 };
 
-function makeTile(t, callback) {
+function makeTile(t) {
   var geojson = {
     "type": "FeatureCollection",
     "features": t.features
@@ -201,9 +174,8 @@ function makeTile(t, callback) {
     z: t.xyz[2],
     x: t.xyz[0],
     y: t.xyz[1],
-    buf: vtile.getData().toString()
+    buffer: vtile.getData().toString('base64')
   };
 
   return JSON.stringify(obj);
 }
-
