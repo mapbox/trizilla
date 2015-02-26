@@ -18,15 +18,15 @@ module.exports = function() {
 
   InflateStream.prototype._transform = function(chunk, enc, callback) {
     var inflateStream = this;
-    var data;
+    var inData;
     try {
-      data = JSON.parse(chunk);
+      inData = JSON.parse(chunk);
     } catch(err) { callback(err); }
 
-    inflateStream.push(inflator(data));
-    minZ = inflateStream.minZ || (data.qt.length-1)/2;
+    inflateStream.push(inflator(inData));
+    minZ = inflateStream.minZ || (inData.qt.length-1)/2;
 
-    if ((data.qt.length-1)/2 > minZ) agg(data);
+    if ((inData.qt.length-1)/2 > minZ) agg(inData);
 
     function agg(data) {
       var parent = data.qt.substring(0, data.qt.length-2);
