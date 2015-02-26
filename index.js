@@ -7,6 +7,7 @@ var Aggregator = require('./lib/aggregator');
 var tiler = require('./lib/tiler');
 var inflator = require('./lib/inflator');
 var Compress = require('./lib/compressor');
+var Tile = require('tilelive').stream.Tile;
 
 mapnik.register_datasource(path.join(mapnik.settings.paths.input_plugins,'geojson.input'));
 
@@ -58,6 +59,7 @@ module.exports = function() {
   }
 
   LayTileStream.prototype._transform = function(chunk, enc, callback) {
+
     var layTileStream = this;
     var data;
     try {
@@ -76,10 +78,31 @@ module.exports = function() {
       tileHolder.tiles[tileQuad] = new tiler.Tile();
       tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
         if (err) callback(err);
-        layTileStream.push(makeTile(tileObj));
+          layTileStream.push(JSON.stringify(tileObj));
       });
     }
-    callback();
+    callback()
+  };
+
+  util.inherits(GZIPstream, Transform);
+
+  function GZIPstream() {
+    Transform.call(this, {});
+    this._writableState.objectMode = true;
+  }
+
+  GZIPstream.prototype._transform = function(chunk, enc, callback) {
+    var GZIPstream = this;
+    var data;
+    try {
+      data = JSON.parse(chunk);
+    } catch(err) { callback(err); }
+
+    makeTile(data, function(err, tile) {
+      if (err) callback(err)
+      GZIPstream.push(tile);
+      callback()
+    });
   };
 
   util.inherits(CleanStream, Transform);
@@ -158,25 +181,24 @@ module.exports = function() {
     serialize: function(x) { return new CerealStream(x); },
     clean: function(options) { return new CleanStream(options); },
     compress: function(levels) { return new CompressStream(levels); },
-    decompress: function(levels) {return new DecompressStream(levels)}
+    decompress: function(levels) {return new DecompressStream(levels)},
+    clean: function(options) { return new CleanStream(options); },
+    gzip: function() { return new GZIPstream(); }
   };
 };
 
-function makeTile(t) {
+function makeTile(t, callback) {
   var geojson = {
     "type": "FeatureCollection",
     "features": t.features
   };
-
   var vtile = new mapnik.VectorTile(t.xyz[2],t.xyz[0],t.xyz[1]);
   vtile.addGeoJSON(JSON.stringify(geojson), "now");
 
-  var obj = {
-    z: t.xyz[2],
-    x: t.xyz[0],
-    y: t.xyz[1],
-    buffer: vtile.getData().toString('base64')
-  };
+  zlib.gzip(vtile.getData(), function(err, buffer) {
+    if (err) return callback(err);
+    var tile = new Tile(t.xyz[2], t.xyz[0], t.xyz[1], buffer);
+    return callback(null, tile);
+  });
 
-  return JSON.stringify(obj);
 }
