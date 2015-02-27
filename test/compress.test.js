@@ -3,12 +3,13 @@ var trizilla = require('../index')();
 var fs = require('fs');
 var tape = require('tape');
 
-var all = []
+var all = [];
+
 tape('should compress a stream', function(t) {
   fs.createReadStream('./test/fixtures/fill-facets-output')
     .pipe(split)
     .pipe(trizilla.clean({}))
-    .pipe(trizilla.compress(2))
+    .pipe(trizilla.compress(2, {}))
     .on('data', function(data) {
       all.push(JSON.parse(data));
   }).on('end', function(td) {

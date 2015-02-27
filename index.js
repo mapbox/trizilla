@@ -25,7 +25,7 @@ module.exports = function() {
     } catch(err) { callback(err); }
 
     inflateStream.push(inflator(inData));
-    minZ = inflateStream.minZ || (inData.qt.length-1)/2;
+    var minZ = inflateStream.minZ || (inData.qt.length-1)/2;
 
     if ((inData.qt.length-1)/2 > minZ) agg(inData);
 
@@ -69,17 +69,14 @@ module.exports = function() {
       data = JSON.parse(chunk);
     } catch(err) { callback(err); }
 
-    delta = layTileStream.delta;
-    tileHolder = layTileStream.tileHolder;
-
     var qti = data.properties.qt.match(/[0-9]/g).join('');
-    var tileQuad = qti.substring(0, qti.length - tileHolder.zoomDelta);
+    var tileQuad = qti.substring(0, qti.length - layTileStream.tileHolder.zoomDelta);
 
-    if (tileHolder.tiles[tileQuad]) {
-      tileHolder.tiles[tileQuad].addFeature(data);
+    if (layTileStream.tileHolder.tiles[tileQuad]) {
+      layTileStream.tileHolder.tiles[tileQuad].addFeature(data);
     } else {
-      tileHolder.tiles[tileQuad] = new tiler.Tile();
-      tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
+      layTileStream.tileHolder.tiles[tileQuad] = new tiler.Tile();
+      layTileStream.tileHolder.tiles[tileQuad].initialize(data, tileQuad, layTileStream.tileHolder.featureCount, function(err, tileObj) {
         if (err) callback(err);
           layTileStream.push(tileObj);
       });
