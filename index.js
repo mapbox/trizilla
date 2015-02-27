@@ -53,13 +53,16 @@ module.exports = function() {
 
   util.inherits(LayTileStream, Transform);
   function LayTileStream(delta) {
-    Transform.call(this, delta);
+    Transform.call(this, {});
+
+    this._writableState.objectMode = true;
+    this._readableState.objectMode = true;
+
     this.delta = delta;
     this.tileHolder = new tiler.Tiler(delta);
   }
 
   LayTileStream.prototype._transform = function(chunk, enc, callback) {
-
     var layTileStream = this;
     var data;
     try {
@@ -78,7 +81,7 @@ module.exports = function() {
       tileHolder.tiles[tileQuad] = new tiler.Tile();
       tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
         if (err) callback(err);
-          layTileStream.push(JSON.stringify(tileObj));
+          layTileStream.push(tileObj);
       });
     }
     callback()
@@ -87,19 +90,18 @@ module.exports = function() {
   util.inherits(GZIPstream, Transform);
 
   function GZIPstream() {
-    Transform.call(this, {});
+    Transform.call(this,{});
     this._writableState.objectMode = true;
+    this._readableState.objectMode = true;
   }
 
   GZIPstream.prototype._transform = function(chunk, enc, callback) {
-    var GZIPstream = this;
-    var data;
-    try {
-      data = JSON.parse(chunk);
-    } catch(err) { callback(err); }
 
-    makeTile(data, function(err, tile) {
+    var GZIPstream = this;
+
+    makeTile(chunk, function(err, tile) {
       if (err) callback(err)
+
       GZIPstream.push(tile);
       callback()
     });
