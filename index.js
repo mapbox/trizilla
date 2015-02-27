@@ -59,6 +59,8 @@ module.exports = function() {
     this._readableState.objectMode = true;
 
     this.delta = delta;
+    this._readableState.objectMode = true;
+    this._writableState.objectMode = true;
     this.tileHolder = new tiler.Tiler(delta);
   }
 
@@ -98,7 +100,6 @@ module.exports = function() {
 
     makeTile(chunk, function(err, tile) {
       if (err) callback(err)
-
       GZIPstream.push(tile);
       callback()
     });
@@ -198,7 +199,8 @@ function makeTile(t, callback) {
   zlib.gzip(vtile.getData(), function(err, buffer) {
     if (err) return callback(err);
     var tile = new Tile(t.xyz[2], t.xyz[0], t.xyz[1], buffer);
-    return callback(null, tile);
+    tile.buffer = tile.buffer.toString('base64');
+    return callback(null, JSON.stringify(tile));
   });
 
 }
