@@ -125,9 +125,10 @@ module.exports = function() {
   };
 
   util.inherits(CompressStream, Transform);
-  function CompressStream(levels) {
+  function CompressStream(levels, featRounding) {
     Transform.call(this, levels);
     this.levels = levels;
+    this.featRounding = featRounding
     this.compressionHolder = new Compress.StreamCompressor(levels);
   }
 
@@ -138,19 +139,19 @@ module.exports = function() {
       data = JSON.parse(chunk);
     } catch(err) { callback(err); }
 
-    levels = compStream.levels
-    compressionHolder = compStream.compressionHolder;
+    var levels = compStream.levels
+    var featRounding = compStream.featRounding
 
     var qt = data.qt.slice(0, data.qt.length - levels * 2);
 
-    if (compressionHolder[qt]) {
-      compressionHolder[qt].aggregate(data);
+    if (compStream.compressionHolder[qt]) {
+      compStream.compressionHolder[qt].aggregate(data);
     } else {
-      compressionHolder[qt] = new Compress.Compressor();
-      compressionHolder[qt].initialize(data, levels, 2, function (err, out, dQt) {
+      compStream.compressionHolder[qt] = new Compress.Compressor();
+      compStream.compressionHolder[qt].initialize(data, levels, featRounding, function (err, out, dQt) {
         if (err) callback(err);
         compStream.push(JSON.stringify(out));
-        compressionHolder[dQt] = true;
+        compStream.compressionHolder[dQt] = true;
       });
     }
     callback();
@@ -182,7 +183,7 @@ module.exports = function() {
     tile: function(delta) { return new LayTileStream(delta); },
     serialize: function(x) { return new CerealStream(x); },
     clean: function(options) { return new CleanStream(options); },
-    compress: function(levels) { return new CompressStream(levels); },
+    compress: function(levels, featRounding) { return new CompressStream(levels, featRounding); },
     decompress: function(levels) {return new DecompressStream(levels)},
     clean: function(options) { return new CleanStream(options); },
     gzip: function() { return new GZIPstream(); }
