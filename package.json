@@ -10,7 +10,6 @@
     "url": "git://github.com/mapbox/trizilla.git"
   },
   "dependencies": {
-    "JSONStream": "0.10.x",
     "mapnik": "^3.1.4",
     "minimist": "^1.1.0",
     "split": "^0.3.3",
@@ -18,7 +17,7 @@
     "tilelive": "^5.6.1"
   },
   "scripts": {
-    "start": "./index.js",
+    "JSONStream": "0.10.x",
     "test": "tape test/*.test.js"
   },
   "devDependencies": {
