@@ -14,7 +14,8 @@
     "mapnik": "^3.1.4",
     "minimist": "^1.1.0",
     "split": "^0.3.3",
-    "tilebelt": "^0.7.0"
+    "tilebelt": "^0.7.0",
+    "tilelive": "^5.6.1"
   },
   "scripts": {
     "start": "./index.js",
