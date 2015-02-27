@@ -55,6 +55,8 @@ module.exports = function() {
   function LayTileStream(delta) {
     Transform.call(this, delta);
     this.delta = delta;
+    this._readableState.objectMode = true;
+    this._writableState.objectMode = true;
     this.tileHolder = new tiler.Tiler(delta);
   }
 
@@ -78,7 +80,7 @@ module.exports = function() {
       tileHolder.tiles[tileQuad] = new tiler.Tile();
       tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
         if (err) callback(err);
-          layTileStream.push(JSON.stringify(tileObj));
+          layTileStream.push(tileObj);
       });
     }
     callback()
@@ -88,20 +90,18 @@ module.exports = function() {
 
   function GZIPstream() {
     Transform.call(this, {});
+    //this._readableState.objectMode = true;
     this._writableState.objectMode = true;
   }
 
   GZIPstream.prototype._transform = function(chunk, enc, callback) {
     var GZIPstream = this;
-    var data;
-    try {
-      data = JSON.parse(chunk);
-    } catch(err) { callback(err); }
 
-    makeTile(data, function(err, tile) {
+    makeTile(chunk, function(err, tile) {
       if (err) callback(err)
-      GZIPstream.push(tile);
-      callback()
+      //console.log(tile);
+      GZIPstream.push(tile+'\n');
+      callback();
     });
   };
 
@@ -197,7 +197,8 @@ function makeTile(t, callback) {
   zlib.gzip(vtile.getData(), function(err, buffer) {
     if (err) return callback(err);
     var tile = new Tile(t.xyz[2], t.xyz[0], t.xyz[1], buffer);
-    return callback(null, tile);
+    tile.buffer = tile.buffer.toString('base64');
+    return callback(null, JSON.stringify(tile));
   });
 
 }
