@@ -25,7 +25,7 @@ module.exports = function() {
     } catch(err) { callback(err); }
 
     inflateStream.push(inflator(inData));
-    minZ = inflateStream.minZ || (inData.qt.length-1)/2;
+    var minZ = inflateStream.minZ || (inData.qt.length-1)/2;
 
     if ((inData.qt.length-1)/2 > minZ) agg(inData);
 
@@ -53,32 +53,30 @@ module.exports = function() {
 
   util.inherits(LayTileStream, Transform);
   function LayTileStream(delta) {
-    Transform.call(this, delta);
-    this.delta = delta;
-    this._readableState.objectMode = true;
+    Transform.call(this, {});
+
     this._writableState.objectMode = true;
+    this._readableState.objectMode = true;
+
+    this.delta = delta;
     this.tileHolder = new tiler.Tiler(delta);
   }
 
   LayTileStream.prototype._transform = function(chunk, enc, callback) {
-
     var layTileStream = this;
     var data;
     try {
       data = JSON.parse(chunk);
     } catch(err) { callback(err); }
 
-    delta = layTileStream.delta;
-    tileHolder = layTileStream.tileHolder;
-
     var qti = data.properties.qt.match(/[0-9]/g).join('');
-    var tileQuad = qti.substring(0, qti.length - tileHolder.zoomDelta);
+    var tileQuad = qti.substring(0, qti.length - layTileStream.tileHolder.zoomDelta);
 
-    if (tileHolder.tiles[tileQuad]) {
-      tileHolder.tiles[tileQuad].addFeature(data);
+    if (layTileStream.tileHolder.tiles[tileQuad]) {
+      layTileStream.tileHolder.tiles[tileQuad].addFeature(data);
     } else {
-      tileHolder.tiles[tileQuad] = new tiler.Tile();
-      tileHolder.tiles[tileQuad].initialize(data, tileQuad, tileHolder.featureCount, function(err, tileObj) {
+      layTileStream.tileHolder.tiles[tileQuad] = new tiler.Tile();
+      layTileStream.tileHolder.tiles[tileQuad].initialize(data, tileQuad, layTileStream.tileHolder.featureCount, function(err, tileObj) {
         if (err) callback(err);
           layTileStream.push(tileObj);
       });
@@ -89,12 +87,13 @@ module.exports = function() {
   util.inherits(GZIPstream, Transform);
 
   function GZIPstream() {
-    Transform.call(this, {});
-    //this._readableState.objectMode = true;
+    Transform.call(this,{});
     this._writableState.objectMode = true;
+    this._readableState.objectMode = true;
   }
 
   GZIPstream.prototype._transform = function(chunk, enc, callback) {
+
     var GZIPstream = this;
 
     makeTile(chunk, function(err, tile) {
@@ -123,9 +122,10 @@ module.exports = function() {
   };
 
   util.inherits(CompressStream, Transform);
-  function CompressStream(levels) {
+  function CompressStream(levels, featRounding) {
     Transform.call(this, levels);
     this.levels = levels;
+    this.featRounding = featRounding
     this.compressionHolder = new Compress.StreamCompressor(levels);
   }
 
@@ -136,19 +136,19 @@ module.exports = function() {
       data = JSON.parse(chunk);
     } catch(err) { callback(err); }
 
-    levels = compStream.levels
-    compressionHolder = compStream.compressionHolder;
+    var levels = compStream.levels
+    var featRounding = compStream.featRounding
 
     var qt = data.qt.slice(0, data.qt.length - levels * 2);
 
-    if (compressionHolder[qt]) {
-      compressionHolder[qt].aggregate(data);
+    if (compStream.compressionHolder[qt]) {
+      compStream.compressionHolder[qt].aggregate(data);
     } else {
-      compressionHolder[qt] = new Compress.Compressor();
-      compressionHolder[qt].initialize(data, levels, 2, function (err, out, dQt) {
+      compStream.compressionHolder[qt] = new Compress.Compressor();
+      compStream.compressionHolder[qt].initialize(data, levels, featRounding, function (err, out, dQt) {
         if (err) callback(err);
         compStream.push(JSON.stringify(out));
-        compressionHolder[dQt] = true;
+        compStream.compressionHolder[dQt] = true;
       });
     }
     callback();
@@ -179,7 +179,7 @@ module.exports = function() {
     inflate: function(value) { return new InflateStream(value); },
     tile: function(delta) { return new LayTileStream(delta); },
     clean: function(options) { return new CleanStream(options); },
-    compress: function(levels) { return new CompressStream(levels); },
+    compress: function(levels, featRounding) { return new CompressStream(levels, featRounding); },
     decompress: function(levels) {return new DecompressStream(levels)},
     clean: function(options) { return new CleanStream(options); },
     gzip: function() { return new GZIPstream(); }
