@@ -183,7 +183,6 @@ module.exports = function() {
     clean: function(options) { return new CleanStream(options); },
     compress: function(levels, featRounding) { return new CompressStream(levels, featRounding); },
     decompress: function(levels) {return new DecompressStream(levels)},
-    clean: function(options) { return new CleanStream(options); },
     gzip: function() { return new GZIPstream(); }
   };
 };
