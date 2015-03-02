@@ -7,7 +7,7 @@ var zlib = require('zlib');
 
 function tileTester(err, tile) {
   if (err) throw (err);
-
+  tile = JSON.parse(tile)
   zlib.gunzip(tile.buffer, function(err, data) {
     if (err) throw (err);
 
