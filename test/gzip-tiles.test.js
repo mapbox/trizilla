@@ -20,9 +20,10 @@ function tileTester(err, tile) {
       
       var vtile = new VectorTile(new Protobuf(data));
 
-      var expected = fs.readFileSync('./test/fixtures/gzip-tiles-expected').toString();
-
-      t.equal(JSON.stringify(vtile), expected);
+      var expected = JSON.parse(fs.readFileSync('./test/fixtures/gzip-tiles-expected'));
+      vtile.layers.now._pbf = JSON.stringify(vtile.layers.now._pbf);
+      expected.layers.now._pbf = JSON.stringify(expected.layers.now._pbf);
+      t.deepLooseEqual(vtile, expected);
 
       t.end();
     });
