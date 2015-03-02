@@ -2,18 +2,19 @@ var trizilla_tilemaker = require('../lib/maketile');
 var fs = require('fs');
 var tape = require('tape');
 var Protobuf = require('pbf');
-var VectorTile = require('vector-tile');
+var VectorTile = require('vector-tile').VectorTile;
 var zlib = require('zlib');
 
 function tileTester(err, tile) {
   if (err) throw (err);
-  tile = JSON.parse(tile)
-  zlib.gunzip(tile.buffer, function(err, data) {
-    if (err) throw (err);
+  tile = JSON.parse(tile);
 
-    var pbf = new Protobuf(data);
-    var vtile = new VectorTile.VectorTile(pbf);
-    console.log(vtile);
+  var parsed = new Buffer(tile.buffer, 'base64');
+
+  zlib.gunzip(parsed, function(err, data) {
+    if (err) throw (err);
+    var vtile = new VectorTile(new Protobuf(data));
+    console.log(JSON.stringify(vtile));
   });
 }
 
