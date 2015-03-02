@@ -15,8 +15,8 @@ tape('should load, parse, inflate, tile, and serialize a stream', function(t) {
     .pipe(trizilla.gzip())
     .on('data', function(data) {
       t.ok(trizilla, 'processed, checking')
-      if (UPDATE) fs.writeFileSync('./test/fixtures/eater-test-expected', data);
-      var expected = fs.readFileSync('./test/fixtures/eater-test-expected').toString();
+      if (UPDATE) fs.writeFileSync('./test/fixtures/index-expected', data);
+      var expected = fs.readFileSync('./test/fixtures/index-expected').toString();
       var data = JSON.stringify(data);
       t.equal(data, expected);
       t.end();
