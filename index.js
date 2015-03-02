@@ -8,6 +8,7 @@ var tiler = require('./lib/tiler');
 var inflator = require('./lib/inflator');
 var Compress = require('./lib/compressor');
 var Tile = require('tilelive').stream.Tile;
+var tileMaker = require('./lib/tiler')
 
 mapnik.register_datasource(path.join(mapnik.settings.paths.input_plugins,'geojson.input'));
 
@@ -98,10 +99,10 @@ module.exports = function() {
 
     var GZIPstream = this;
 
-    makeTile(chunk, function(err, tile) {
+    tileMaker.makeTile(chunk, function(err, tile) {
       if (err) callback(err)
-      GZIPstream.push(tile);
-      callback()
+      GZIPstream.push(tile+'\n');
+      callback();
     });
   };
 
@@ -186,20 +187,3 @@ module.exports = function() {
     gzip: function() { return new GZIPstream(); }
   };
 };
-
-function makeTile(t, callback) {
-  var geojson = {
-    "type": "FeatureCollection",
-    "features": t.features
-  };
-  var vtile = new mapnik.VectorTile(t.xyz[2],t.xyz[0],t.xyz[1]);
-  vtile.addGeoJSON(JSON.stringify(geojson), "now");
-
-  zlib.gzip(vtile.getData(), function(err, buffer) {
-    if (err) return callback(err);
-    var tile = new Tile(t.xyz[2], t.xyz[0], t.xyz[1], buffer);
-    tile.buffer = tile.buffer.toString('base64');
-    return callback(null, JSON.stringify(tile));
-  });
-
-}

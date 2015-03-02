@@ -17,10 +17,10 @@
     "tilelive": "^5.6.1"
   },
   "scripts": {
-    "JSONStream": "0.10.x",
     "test": "tape test/*.test.js"
   },
   "devDependencies": {
-    "tape": "^3.5.0"
+    "tape": "^3.5.0",
+    "JSONStream": "0.10.x"
   }
 }
