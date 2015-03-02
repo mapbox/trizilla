@@ -5,8 +5,9 @@ var Protobuf = require('pbf');
 var VectorTile = require('vector-tile').VectorTile;
 
 function tileTester(err, data) {
-  var vtile = new VectorTile(new Protobuf(JSON.parse(data)));
-  console.log(vtile)
+  var pbf = new Protobuf(data);
+  var vtile = new VectorTile(pbf);
+  console.log(vtile.layers);
 }
 
 fs.readFile('./test/fixtures/laytile-expected', tileTester)
