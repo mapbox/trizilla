@@ -9,7 +9,7 @@ function tileTester(err, data) {
   if (err) throw (err);
   var tile = JSON.parse(data);
 
-  zlib.gunzip(data.buffer, function(err, data) {
+  zlib.gunzip(tile.buffer, function(err, data) {
     var pbf = new Protobuf(data);
     var vtile = new VectorTile.VectorTile(pbf);
     console.log(vtile);
