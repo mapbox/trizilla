@@ -17,12 +17,13 @@ function tileTester(err, tile) {
       if (err) throw (err);
 
       t.ok(trizilla_tilemaker, 'data unserialized and gunzipped');
-
+      
       var vtile = new VectorTile(new Protobuf(data));
 
       var expected = fs.readFileSync('./test/fixtures/gzip-tiles-expected').toString();
 
       t.equal(JSON.stringify(vtile), expected);
+
       t.end();
     });
   });
