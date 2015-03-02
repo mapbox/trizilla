@@ -1,16 +1,11 @@
 var util = require('util');
-var path = require('path');
-var zlib = require('zlib');
-var mapnik = require('mapnik');
+
 var Transform = require('stream').Transform;
 var Aggregator = require('./lib/aggregator');
 var tiler = require('./lib/tiler');
 var inflator = require('./lib/inflator');
 var Compress = require('./lib/compressor');
-var Tile = require('tilelive').stream.Tile;
-var tileMaker = require('./lib/tiler')
-
-mapnik.register_datasource(path.join(mapnik.settings.paths.input_plugins,'geojson.input'));
+var tileMaker = require('./lib/maketile');
 
 module.exports = function() {
   var parentHolder = {};
