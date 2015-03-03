@@ -15,7 +15,7 @@ tape('should load, parse, inflate, tile, and serialize a stream', function(t) {
     .pipe(trizilla.gzip())
     .on('data', function(data) {
       t.ok(trizilla, 'processed, checking')
-      if (UPDATE) fs.writeFileSync('./test/fixtures/index-expected', data);
+
       var expected = JSON.parse(fs.readFileSync('./test/fixtures/index-expected'));
 
       t.deepLooseEqual(data, expected);
