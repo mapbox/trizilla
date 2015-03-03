@@ -19,11 +19,27 @@ function tileTester(err, tile) {
       t.ok(trizilla_tilemaker, 'data unserialized and gunzipped');
       
       var vtile = new VectorTile(new Protobuf(data));
+      var expected = JSON.parse(fs.readFileSync('./test/fixtures/gzip-tiles-features-expected'));
 
-      var expected = JSON.parse(fs.readFileSync('./test/fixtures/gzip-tiles-expected'));
-      vtile.layers.now._pbf = JSON.stringify(vtile.layers.now._pbf);
-      expected.layers.now._pbf = JSON.stringify(expected.layers.now._pbf);
-      t.deepLooseEqual(vtile, expected);
+      var actualFeatures = [];
+      var actualTypes = [];
+
+      t.equal(vtile.layers.now.extent, 4096, 'layer extent should be the same');
+
+      t.equal(vtile.layers.now.name, 'now', 'layer should have the same name');
+
+      t.equal(vtile.layers.now.length, 50, 'layer should have the same number of features');
+
+      for (var i = 0; i < vtile.layers.now.length; i ++) {
+        actualFeatures.push(vtile.layers.now.feature(i).loadGeometry());
+        actualTypes.push(vtile.layers.now.feature(i).type)
+      }
+
+      t.deepLooseEqual(actualFeatures, expected, 'layer feature geometries should match');
+
+      var expectedTypes = [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3];
+
+      t.deepLooseEqual(actualTypes, expectedTypes, 'layer feature types should match')
 
       t.end();
     });
