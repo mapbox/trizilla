@@ -32,11 +32,11 @@ tape('should load, parse, inflate, tile, and serialize a stream', function(t) {
 
         t.equal(vtile.layers.now.length, 128, 'layer should have the same number of features');
 
-        var actualFeatures = [];
+        var actualFeatures = {};
         var actualTypes = [];
 
         for (var i = 0; i < vtile.layers.now.length; i ++) {
-          actualFeatures.push(vtile.layers.now.feature(i).loadGeometry());
+          actualFeatures[JSON.stringify(vtile.layers.now.feature(i).loadGeometry())] = JSON.stringify(vtile.layers.now.feature(i).loadGeometry())
           actualTypes.push(vtile.layers.now.feature(i).type)
         }
 
@@ -44,7 +44,7 @@ tape('should load, parse, inflate, tile, and serialize a stream', function(t) {
 
         var expectedFeatures = JSON.parse(fs.readFileSync('./test/fixtures/index-features-expected'));
 
-        t.deepLooseEqual(actualFeatures.sort(), expectedFeatures.sort(), 'layer feature geometries should match');
+        t.deepLooseEqual(actualFeatures, expectedFeatures, 'layer feature geometries should match');
 
         t.deepLooseEqual(actualTypes, expectedTypes, 'layer feature types should match');
 
