@@ -76,7 +76,7 @@ module.exports = function() {
       layTileStream.tileHolder.tiles[tileQuad] = new tiler.Tile();
       layTileStream.tileHolder.tiles[tileQuad].initialize(data, tileQuad, layTileStream.tileHolder.featureCount, function(err, tileObj) {
         if (err) callback(err);
-          layTileStream.push(tileObj);
+        layTileStream.push(tileObj);
       });
     }
     callback()
@@ -88,18 +88,26 @@ module.exports = function() {
     Transform.call(this,{});
     this._writableState.objectMode = true;
     this._readableState.objectMode = true;
+    this._buffer = [];
   }
 
   GZIPstream.prototype._transform = function(chunk, enc, callback) {
-
     var GZIPstream = this;
+    var data = GZIPstream._buffer.pop();
+    if (data) GZIPstream.push(data + '\n');
 
     tileMaker.makeTile(chunk, function(err, tile) {
       if (err) callback(err)
-      GZIPstream.push(tile+'\n');
+      GZIPstream._buffer.push(tile);
       callback();
     });
   };
+
+  GZIPstream.prototype._flush = function(callback) {
+    var data = GZIPstream._buffer.pop();
+    if (data) GZIPstream.push(data);
+    callback();
+  }
 
   util.inherits(CleanStream, Transform);
   function CleanStream(options) { Transform.call(this, options); }
