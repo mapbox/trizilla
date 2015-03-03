@@ -76,11 +76,21 @@ module.exports = function() {
       layTileStream.tileHolder.tiles[tileQuad] = new tiler.Tile();
       layTileStream.tileHolder.tiles[tileQuad].initialize(data, tileQuad, layTileStream.tileHolder.featureCount, function(err, tileObj) {
         if (err) callback(err);
-          layTileStream.push(tileObj);
+        layTileStream.push(tileObj);
+        layTileStream.tileHolder.tiles[tileObj.quadtree] = {}
       });
     }
     callback()
   };
+
+  LayTileStream.prototype._flush = function(done) {
+    for (var i in this.tileHolder.tiles) {
+      if (this.tileHolder.tiles[i].features) {
+        this.tileHolder.tiles[i].flushFeatures();
+      }
+    }
+    done();
+  }
 
   util.inherits(GZIPstream, Transform);
 
