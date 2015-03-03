@@ -35,11 +35,11 @@ function tileTester(err, tile) {
         actualTypes.push(vtile.layers.now.feature(i).type)
       }
 
-      t.deepLooseEqual(actualFeatures, expected, 'layer feature geometries should match');
+      t.deepLooseEqual(actualFeatures.sort(), expected.sort(), 'layer feature geometries should match');
 
       var expectedTypes = [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3];
 
-      t.deepLooseEqual(actualTypes, expectedTypes, 'layer feature types should match')
+      t.deepLooseEqual(actualTypes, expectedTypes, 'layer feature types should match');
 
       t.end();
     });
