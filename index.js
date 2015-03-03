@@ -177,9 +177,8 @@ module.exports = function() {
       for (var i = 0; i < outData.length; i++) {
         decompStream.push(JSON.stringify(outData[i]) + '\n');
       }
+      callback();
     });
-
-    callback();
   };
 
   return {
