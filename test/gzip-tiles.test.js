@@ -21,7 +21,7 @@ function tileTester(err, tile) {
       var vtile = new VectorTile(new Protobuf(data));
       var expected = JSON.parse(fs.readFileSync('./test/fixtures/gzip-tiles-features-expected'));
 
-      var actualFeatures = [];
+      var actualFeatures = {};
       var actualTypes = [];
 
       t.equal(vtile.layers.now.extent, 4096, 'layer extent should be the same');
@@ -31,11 +31,11 @@ function tileTester(err, tile) {
       t.equal(vtile.layers.now.length, 50, 'layer should have the same number of features');
 
       for (var i = 0; i < vtile.layers.now.length; i ++) {
-        actualFeatures.push(vtile.layers.now.feature(i).loadGeometry());
+        actualFeatures[JSON.stringify(vtile.layers.now.feature(i).loadGeometry())] = JSON.stringify(vtile.layers.now.feature(i).loadGeometry());
         actualTypes.push(vtile.layers.now.feature(i).type)
       }
 
-      t.deepLooseEqual(actualFeatures.sort(), expected.sort(), 'layer feature geometries should match');
+      t.deepLooseEqual(actualFeatures, expected, 'layer feature geometries should match');
 
       var expectedTypes = [3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3];
 
