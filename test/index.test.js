@@ -44,7 +44,7 @@ tape('should load, parse, inflate, tile, and serialize a stream', function(t) {
 
         var expectedFeatures = JSON.parse(fs.readFileSync('./test/fixtures/index-features-expected'));
 
-        t.deepLooseEqual(actualFeatures, expectedFeatures, 'layer feature geometries should match');
+        t.deepLooseEqual(actualFeatures.sort(), expectedFeatures.sort(), 'layer feature geometries should match');
 
         t.deepLooseEqual(actualTypes, expectedTypes, 'layer feature types should match');
 
