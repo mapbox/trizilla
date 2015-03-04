@@ -104,8 +104,8 @@ module.exports = function() {
   };
 
   GZIPstream.prototype._flush = function(callback) {
-    var data = GZIPstream._buffer.pop();
-    if (data) GZIPstream.push(data);
+    var data = this._buffer.pop();
+    if (data) this.push(data);
     callback();
   }
 
