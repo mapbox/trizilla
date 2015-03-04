@@ -77,7 +77,7 @@ module.exports = function() {
       layTileStream.tileHolder.tiles[tileQuad].initialize(data, tileQuad, layTileStream.tileHolder.featureCount, function(err, tileObj) {
         if (err) callback(err);
         layTileStream.push(tileObj);
-        layTileStream.tileHolder.tiles[tileObj.quadtree] = {}
+        layTileStream.tileHolder.tiles[tileObj.quadtree] = false;
       });
     }
     callback()
@@ -85,7 +85,7 @@ module.exports = function() {
 
   LayTileStream.prototype._flush = function(done) {
     for (var i in this.tileHolder.tiles) {
-      if (this.tileHolder.tiles[i].features) {
+      if (this.tileHolder.tiles[i]) {
         this.tileHolder.tiles[i].flushFeatures();
       }
     }
