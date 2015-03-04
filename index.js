@@ -170,21 +170,29 @@ module.exports = function() {
   };
 
   util.inherits(DecompressStream, Transform);
-  function DecompressStream(levels) {
-    Transform.call(this, levels);
+  function DecompressStream(dcType) {
+    Transform.call(this, dcType);
+    if (!dcType || (dcType !== 'Decompressor' && dcType !== 'ForceDecompressor')) {
+      dcType = 'Decompressor'
+    }
+    this.dcType = dcType
   }
 
   DecompressStream.prototype._transform = function(chunk, enc, callback) {
+    if (!chunk.toString()) return callback();
     var decompStream = this;
     var data;
     try {
       data = JSON.parse(chunk);
     } catch(err) { callback(err); }
-    var dc = new Compress.Decompressor()
+    var dc = new Compress[this.dcType]()
     dc.decompress(data, function(err, outData) {
+      if (err) callback(err);
+
       for (var i = 0; i < outData.length; i++) {
         decompStream.push(JSON.stringify(outData[i]) + '\n');
       }
+
       callback();
     });
   };
@@ -195,7 +203,7 @@ module.exports = function() {
     serialize: function(x) { return new CerealStream(x); },
     clean: function(options) { return new CleanStream(options); },
     compress: function(levels, featRounding) { return new CompressStream(levels, featRounding); },
-    decompress: function(levels) {return new DecompressStream(levels)},
+    decompress: function(decompressType) {return new DecompressStream(decompressType)},
     gzip: function() { return new GZIPstream(); }
   };
 };
