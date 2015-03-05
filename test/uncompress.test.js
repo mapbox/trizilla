@@ -10,7 +10,7 @@ tape('should force decompress to stored triangle size', function(t) {
         t.equals(err, null, 'should not error');
         var expected = [{
             qt: 's0s3s3s3s3s3s3s',
-            attributes: { band_2: '4.64', band_1: '28.03' }
+            attributes: { band_2: 4.64, band_1: 28.03 }
         }];
         t.deepEqual(data, expected, 'should return the correct force decompressed values')
         t.end()
