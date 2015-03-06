@@ -8,13 +8,13 @@ var zlib = require('zlib');
 
 tape('should load, parse, inflate, tile, and serialize a stream', function(t) {
   var actualData = [];
-  fs.createReadStream('./test/fixtures/fill-facets-output')
+  fs.createReadStream('./test/fixtures/data-stream')
     .pipe(split)
     .pipe(trizilla.clean({}))
     .pipe(trizilla.compress(3, {}))
     .pipe(trizilla.decompress({}))
     .pipe(trizilla.inflate(5))
-    .pipe(trizilla.tile(3))
+    .pipe(trizilla.tile(2))
     .pipe(trizilla.gzip())
     .on('data', function(tile) {
       actualData.push({});

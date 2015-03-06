@@ -8,10 +8,12 @@ var Compress = require('./lib/compressor');
 var tileMaker = require('./lib/maketile');
 
 module.exports = function() {
-  var parentHolder = {};
 
   util.inherits(InflateStream, Transform);
-  function InflateStream(minZ) { Transform.call(this, minZ); this.minZ = minZ; }
+  function InflateStream(minZ) {
+    Transform.call(this, minZ); this.minZ = minZ;
+    this.parentHolder = {};
+  }
 
   InflateStream.prototype._transform = function(chunk, enc, callback) {
     var inflateStream = this;
@@ -28,19 +30,19 @@ module.exports = function() {
     function agg(data) {
       var parent = data.qt.substring(0, data.qt.length-2);
 
-      if (parentHolder[parent]) {
-        parentHolder[parent].aggregate(data.attributes);
+      if (inflateStream.parentHolder[parent]) {
+        inflateStream.parentHolder[parent].aggregate(data.attributes);
       } else {
-        parentHolder[parent] = new Aggregator();
-        parentHolder[parent].initialize(parent, data.attributes, function(err, child, pID) {
+        inflateStream.parentHolder[parent] = new Aggregator();
+        inflateStream.parentHolder[parent].initialize(parent, data.attributes, function(err, child, pID) {
           if (err) callback(err);
 
           var pdata = { "qt": pID, "attributes": child };
           inflateStream.push(inflator(pdata));
 
-          if ((pID.length-1)/2 >= minZ) agg(pdata);
+          if ((pID.length-1)/2 > minZ) agg(pdata);
 
-          parentHolder[pID] = {};
+          inflateStream.parentHolder[pID] = false;
         });
       }
     }
