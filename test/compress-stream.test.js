@@ -11,6 +11,8 @@ tape('should compress a stream', function(t) {
     .pipe(trizilla.compress(2, {}))
     .on('data', function(data) {
       all.push(JSON.parse(data));
+  }).on('error', function(err) {
+    console.log(err);
   }).on('end', function(td) {
     t.ok(trizilla, 'stream compressed, checking')
     var expected = fs.readFileSync('./test/fixtures/compressed-expected').toString();
