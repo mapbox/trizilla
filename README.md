@@ -1,5 +1,6 @@
 # trizilla
 [![Build Status](https://travis-ci.org/mapbox/trizilla.svg)](https://travis-ci.org/mapbox/trizilla)
+[![Coverage Status](https://coveralls.io/repos/mapbox/trizilla/badge.svg?branch=master)](https://coveralls.io/r/mapbox/trizilla?branch=master)
 
 Consumes data values from a latticegrid, then aggregates and inflates triangular geometries.
 
